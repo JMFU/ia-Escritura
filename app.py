@@ -102,7 +102,7 @@ with col_chat:
                     except Exception as e:
                         st.error(f"Error: {e}")
 
-import documento_reader # Puedes usar librerías como PyPDF2 o python-docx
+import PyPDF2 # Puedes usar librerías como PyPDF2 o python-docx
 
 uploaded_file = st.sidebar.file_uploader("Subir borrador (PDF o DOCX)", type=["pdf", "docx"])
 
