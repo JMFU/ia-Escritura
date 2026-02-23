@@ -16,7 +16,7 @@ with st.sidebar:
     api_key = st.text_input("Google API Key:", type="password")
     modelo_nombre = st.selectbox(
         "Modelo:",
-        ["gemini-1.5-flash", "gemini-1.5-pro"]
+        ["gemini-2.5-flash", "gemini-2.5-pro"]
     )
 
     if api_key:
@@ -25,7 +25,7 @@ with st.sidebar:
     st.divider()
     agente_activo = st.radio(
         "Seleccionar Agente:",
-        ["Estratega Creativo", "Arquitecto de Estructura", "Editor de Estilo"]
+        ["Estratega Creativo", "Arquitecto de Estructura", "Editor de Estilo", ]
     )
 
     if st.button("Limpiar Chat"):
