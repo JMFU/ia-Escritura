@@ -1,5 +1,9 @@
 import streamlit as st
 import google.generativeai as genai
+import docx  # Importación para Word
+import PyPDF2 # Importación para PDF
+import io
+
 
 # --- CONFIGURACIÓN ---
 st.set_page_config(page_title="Multi-Agente Literario", layout="wide")
@@ -21,6 +25,35 @@ with st.sidebar:
 
     if api_key:
         genai.configure(api_key=api_key)
+
+    st.divider()
+    st.subheader("📁 Cargar Borrador")
+    uploaded_file = st.file_uploader("Sube tu documento (PDF o DOCX)", type=["pdf", "docx"])
+
+    if uploaded_file is not None:
+        texto_extraido = ""
+
+        try:
+            # Si es un archivo WORD
+            if uploaded_file.type == "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
+                doc = docx.Document(uploaded_file)
+                texto_extraido = "\n".join([para.text for para in doc.paragraphs])
+
+            # Si es un archivo PDF
+            elif uploaded_file.type == "application/pdf":
+                pdf_reader = PyPDF2.PdfReader(uploaded_file)
+                for page in pdf_reader.pages:
+                    texto_extraido += page.extract_text()
+
+            # Guardar en la Memoria Compartida (Documento Maestro)
+            if texto_extraido:
+                st.session_state.master_doc = texto_extraido
+                st.success("✅ ¡Documento cargado con éxito!")
+            else:
+                st.error("No se pudo extraer texto del archivo.")
+
+        except Exception as e:
+            st.error(f"Error al leer el archivo: {e}")
 
     st.divider()
     agente_activo = st.radio(
@@ -102,7 +135,8 @@ with col_chat:
                     except Exception as e:
                         st.error(f"Error: {e}")
 
-import PyPDF2 # Puedes usar librerías como PyPDF2 o python-docx
+"""
+import documento_reader  # Puedes usar librerías como PyPDF2 o python-docx
 
 uploaded_file = st.sidebar.file_uploader("Subir borrador (PDF o DOCX)", type=["pdf", "docx"])
 
@@ -114,3 +148,4 @@ if uploaded_file is not None:
         texto = "\n".join([para.text for para in doc.paragraphs])
         st.session_state.master_doc = texto
         st.sidebar.success("Archivo cargado en la memoria maestra")
+"""
