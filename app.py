@@ -101,3 +101,16 @@ with col_chat:
                         st.session_state.chat_history.append({"role": "assistant", "content": respuesta_texto})
                     except Exception as e:
                         st.error(f"Error: {e}")
+
+import documento_reader # Puedes usar librerías como PyPDF2 o python-docx
+
+uploaded_file = st.sidebar.file_uploader("Subir borrador (PDF o DOCX)", type=["pdf", "docx"])
+
+if uploaded_file is not None:
+    # Lógica para extraer texto según el formato
+    if uploaded_file.type == "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
+        import docx
+        doc = docx.Document(uploaded_file)
+        texto = "\n".join([para.text for para in doc.paragraphs])
+        st.session_state.master_doc = texto
+        st.sidebar.success("Archivo cargado en la memoria maestra")
