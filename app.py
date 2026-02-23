@@ -14,7 +14,10 @@ if "chat_history" not in st.session_state:
 with st.sidebar:
     st.title("⚙️ Configuración")
     api_key = st.text_input("Google API Key:", type="password")
-    modelo_nombre = st.selectbox("Modelo:", ["gemini-1.5-pro", "gemini-1.5-flash"])
+    modelo_nombre = st.selectbox(
+        "Modelo:",
+        ["gemini-1.5-flash", "gemini-1.5-pro"]
+    )
 
     if api_key:
         genai.configure(api_key=api_key)
@@ -88,7 +91,7 @@ with col_chat:
             with st.chat_message("assistant"):
                 with st.spinner("Consultando memoria y generando respuesta..."):
                     try:
-                        model = genai.GenerativeModel(modelo_nombre)
+                        model = genai.GenerativeModel(model_name=modelo_nombre)
                         # Enviamos el contexto total
                         response = model.generate_content(contexto_total)
                         respuesta_texto = response.text
