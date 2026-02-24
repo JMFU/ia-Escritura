@@ -21,7 +21,7 @@ with st.sidebar:
     # Corregidos nombres de modelos a versiones existentes (1.5 o 2.0-flash)
     modelo_nombre = st.selectbox(
         "Modelo:",
-        ["gemini-1.5-flash", "gemini-1.5-pro"]
+        ["gemini-2.5-flash", "gemini-2.5-pro"]
     )
 
     if api_key:
