@@ -4,12 +4,21 @@ import os
 # Configura tu API KEY
 genai.configure(api_key="TU_API_KEY_AQUÍ")
 
+# Define los filtros para permitir más libertad creativa
+safety_settings = [
+    {"category": "HARM_CATEGORY_HARASSMENT", "threshold": "BLOCK_NONE"},
+    {"category": "HARM_CATEGORY_HATE_SPEECH", "threshold": "BLOCK_NONE"},
+    {"category": "HARM_CATEGORY_SEXUALLY_EXPLICIT", "threshold": "BLOCK_NONE"},
+    {"category": "HARM_CATEGORY_DANGEROUS_CONTENT", "threshold": "BLOCK_NONE"},
+]
+
 class AgenteEscritura:
     def __init__(self, nombre, instrucciones_sistema):
         self.nombre = nombre
         # Configuramos el modelo con sus instrucciones específicas
         self.model = genai.GenerativeModel(
-            model_name="gemini-1.5-flash", # O gemini-1.5-pro para mayor calidad
+            model_name="gemini-2.5-flash", # O gemini-1.5-pro para mayor calidad
+            safety_settings=safety_settings,
             system_instruction=instrucciones_sistema
         )
         self.chat = self.model.start_chat(history=[])
@@ -39,6 +48,24 @@ Eres un editor profesional con ojo clínico para la prosa.
 Te enfocas en mejorar el vocabulario, eliminar muletillas, ajustar el tono y asegurar 
 que la lectura fluya perfectamente. Eres crítico y directo.
 """
+
+try:
+    response = model.generate_content(contexto_total)
+
+    # Verificar si la respuesta tiene contenido antes de acceder a .text
+    if response.candidates and response.candidates[0].content.parts:
+        respuesta_texto = response.text
+        st.markdown(respuesta_texto)
+        st.session_state.chat_history.append({"role": "assistant", "content": respuesta_texto})
+    else:
+        # Si no hay candidatos, es que fue bloqueado
+        st.warning(
+            "⚠️ La respuesta fue bloqueada por los filtros de seguridad de Google. Intenta reformular tu idea o suavizar el contenido.")
+        if response.prompt_feedback:
+            st.caption(f"Razón del bloqueo: {response.prompt_feedback.block_reason}")
+
+except Exception as e:
+    st.error(f"Ocurrió un error inesperado: {str(e)}")
 
 # --- ORQUESTADOR DEL FLUJO ---
 
