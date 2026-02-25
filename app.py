@@ -94,9 +94,6 @@ with st.sidebar:
         except Exception as e:
             st.error(f"Error al leer el archivo: {e}")
 
-    st.divider()
-
-
 # --- DEFINICIÓN DE PROMPTS DE SISTEMA ---
 PROMPTS = {
     "Estratega Creativo": "Eres un consultor creativo. Tu base de conocimiento es el 'DOCUMENTO MAESTRO' adjunto. Ayuda a expandir la trama y personajes basándote en lo escrito.",
