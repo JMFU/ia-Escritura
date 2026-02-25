@@ -33,6 +33,27 @@ with st.sidebar:
     st.title("⚙️ Configuración")
     api_key = st.text_input("Google API Key:", type="password")
 
+    # Modelos, esto se debe actualizar cuando se actualice streamlit
+    modelo_nombre = st.selectbox(
+        "Modelo:",
+        ["gemini-2.5-flash", "gemini-2.5-pro"]
+    )
+
+    if api_key:
+        genai.configure(api_key=api_key)
+
+    st.divider()
+    agente_activo = st.radio(
+        "Seleccionar Agente:",
+        ["Estratega Creativo", "Arquitecto de Estructura", "Editor de Estilo"]
+    )
+
+    if st.button("Limpiar Chat"):
+        st.session_state.chat_history = []
+        st.rerun()
+
+    st.divider()
+
     # SECCIÓN DE PERSISTENCIA
     with st.expander("💾 Guardar/Cargar Progreso"):
         # Botón para descargar la sesión actual
@@ -52,16 +73,7 @@ with st.sidebar:
 
     st.divider()
 
-    # Modelos, esto se debe actualizar cuando se actualice streamlit
-    modelo_nombre = st.selectbox(
-        "Modelo:",
-        ["gemini-2.5-flash", "gemini-2.5-pro"]
-    )
-
-    if api_key:
-        genai.configure(api_key=api_key)
-
-    st.divider()
+    # SECCIÓN DE CARGAR DOCUMENTO PDF O DOCX
     st.subheader("📁 Cargar Borrador")
     uploaded_file = st.file_uploader("Sube tu documento (PDF o DOCX)", type=["pdf", "docx"])
 
@@ -83,14 +95,7 @@ with st.sidebar:
             st.error(f"Error al leer el archivo: {e}")
 
     st.divider()
-    agente_activo = st.radio(
-        "Seleccionar Agente:",
-        ["Estratega Creativo", "Arquitecto de Estructura", "Editor de Estilo"]
-    )
 
-    if st.button("Limpiar Chat"):
-        st.session_state.chat_history = []
-        st.rerun()
 
 # --- DEFINICIÓN DE PROMPTS DE SISTEMA ---
 PROMPTS = {
@@ -141,7 +146,23 @@ with col_chat:
 
             # 2. Generar respuesta
             with st.chat_message("assistant"):
-                with st.spinner(f"El {agente_activo} está analizando..."):
+                with st.spinner(f"El {agente_activo} está analizando con precisión..."):
+
+                    # PROMPT DE INGENIERÍA PARA EVITAR ALUCINACIONES
+                    contexto_blindado = f"""
+                                ESTRICTAMENTE: Eres un asistente que solo utiliza la información del DOCUMENTO MAESTRO.
+                                Si algo no está en el documento, di claramente 'No tengo esa información en el borrador'.
+
+                                PASOS PARA TU RESPUESTA:
+                                1. Extrae los hechos relevantes del DOCUMENTO MAESTRO.
+                                2. Verifica que tu respuesta no contradiga lo escrito.
+                                3. Si sugieres algo nuevo, márcalo como [SUGERENCIA].
+
+                                DOCUMENTO MAESTRO:
+                                {st.session_state.master_doc}
+
+                                PETICIÓN: {prompt}
+                                """
 
                     # Preparar contexto total
                     contexto_total = f"""
