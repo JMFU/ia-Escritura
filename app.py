@@ -2,10 +2,25 @@ import streamlit as st
 import google.generativeai as genai
 import docx  # Importación para Word
 import PyPDF2  # Importación para PDF
+import json
 import io
 
 # --- CONFIGURACIÓN DE LA PÁGINA ---
 st.set_page_config(page_title="Multi-Agente Literario", layout="wide")
+
+# --- FUNCIONES DE PERSISTENCIA ---
+def exportar_sesion():
+    sesion = {
+        "master_doc": st.session_state.master_doc,
+        "chat_history": st.session_state.chat_history
+    }
+    return json.dumps(sesion, indent=4)
+
+def importar_sesion(archivo_json):
+    datos = json.load(archivo_json)
+    st.session_state.master_doc = datos["master_doc"]
+    st.session_state.chat_history = datos["chat_history"]
+    st.success("¡Sesión restaurada correctamente!")
 
 # Inicializar estados de sesión
 if "master_doc" not in st.session_state:
@@ -18,7 +33,26 @@ with st.sidebar:
     st.title("⚙️ Configuración")
     api_key = st.text_input("Google API Key:", type="password")
 
-    # Corregidos nombres de modelos a versiones existentes (1.5 o 2.0-flash)
+    # SECCIÓN DE PERSISTENCIA
+    with st.expander("💾 Guardar/Cargar Progreso"):
+        # Botón para descargar la sesión actual
+        st.download_button(
+            label="Descargar Proyecto (.json)",
+            data=exportar_sesion(),
+            file_name="mi_novela_ia.json",
+            mime="application/json"
+        )
+
+        # Subir sesión guardada anteriormente
+        archivo_cargado = st.file_uploader("Importar Proyecto", type=["json"])
+        if archivo_cargado:
+            if st.button("Confirmar Importación"):
+                importar_sesion(archivo_cargado)
+                st.rerun()
+
+    st.divider()
+
+    # Modelos, esto se debe actualizar cuando se actualice streamlit
     modelo_nombre = st.selectbox(
         "Modelo:",
         ["gemini-2.5-flash", "gemini-2.5-pro"]
