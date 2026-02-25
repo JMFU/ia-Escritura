@@ -145,25 +145,13 @@ with col_chat:
             with st.chat_message("assistant"):
                 with st.spinner(f"El {agente_activo} está analizando con precisión..."):
 
-                    # PROMPT DE INGENIERÍA PARA EVITAR ALUCINACIONES
-                    contexto_blindado = f"""
-                                ESTRICTAMENTE: Eres un asistente que solo utiliza la información del DOCUMENTO MAESTRO.
-                                Si algo no está en el documento, di claramente 'No tengo esa información en el borrador'.
-
-                                PASOS PARA TU RESPUESTA:
-                                1. Extrae los hechos relevantes del DOCUMENTO MAESTRO.
-                                2. Verifica que tu respuesta no contradiga lo escrito.
-                                3. Si sugieres algo nuevo, márcalo como [SUGERENCIA].
-
-                                DOCUMENTO MAESTRO:
-                                {st.session_state.master_doc}
-
-                                PETICIÓN: {prompt}
-                                """
-
-                    # Preparar contexto total
+                    # Preparar contexto total con prompt de ingerniería para reducir alucinaciones
                     contexto_total = f"""
                     INSTRUCCIÓN DE ROL: {PROMPTS[agente_activo]}
+                    PASOS PARA TU RESPUESTA:
+                                1. Extrae los hechos relevantes del DOCUMENTO MAESTRO.
+                                2. Verifica que tu respuesta no contradiga lo escrito.
+                                3. Si sugieres algo nuevo que no está en el documento, márcalo como [SUGERENCIA, No tengo esa información en el borrador].
                     ---
                     DOCUMENTO MAESTRO ACTUAL:
                     {st.session_state.master_doc}
